@@ -24,7 +24,8 @@ conditionalAppend(cwd + "/tensorflow_fcn")
 # General imports
 from termcolor import colored
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import scipy.misc
 from scipy.io import savemat
 import time
@@ -332,7 +333,7 @@ class FCN8VGG16Model_Run(object):
         # restrict GPU usage
         putils.AllocateGPU(self.N_GPUs)
         
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
         
         # Load and apply pretrained network     
         vgg = fcn8_vgg.FCN8VGG()

@@ -8,6 +8,8 @@ Data management utilities
 # Append relevant paths
 import os
 import sys
+import imageio
+import imageutils
 
 def conditionalAppend(Dir):
     """ Append dir to sys path"""
@@ -119,7 +121,7 @@ def GetSplitData(IMAGEPATH="", LABELPATH="", MODELPATH="", \
         # Get image dimensions
         if SAVE_FOVs:
             # Read image since you'll need it later anyways
-            im = scipy.misc.imread(IMAGEPATH + imname)
+            im = imageio.imread(IMAGEPATH + imname)
             # dimensions
             M = im.shape[0]
             N = im.shape[1]
@@ -129,7 +131,7 @@ def GetSplitData(IMAGEPATH="", LABELPATH="", MODELPATH="", \
                 imInfo = str(subprocess.check_output("file " + IMAGEPATH + imname, shell=True))
                 N, M = re.search('(\d+) x (\d+)', imInfo).groups()
             except:
-                thisim = scipy.misc.imread(IMAGEPATH + imname)
+                thisim = imageio.imread(IMAGEPATH + imname)
                 M = thisim.shape[0]
                 N = thisim.shape[1]
                 thisim = None
@@ -141,7 +143,7 @@ def GetSplitData(IMAGEPATH="", LABELPATH="", MODELPATH="", \
         if not IS_UNLABELED: 
             labelname = labelNames_original[imidx]
             if ".mat" not in labelname:
-                lbl = scipy.misc.imread(LABELPATH + labelname)
+                lbl = imageio.imread(LABELPATH + labelname)
             else:    
                 lbl = loadmat(LABELPATH + labelname)['label_crop']
         
@@ -298,7 +300,7 @@ def GetSplitData(IMAGEPATH="", LABELPATH="", MODELPATH="", \
                 # RGB image
                 ThisFOV_RGB = im[fovbounds[0]:fovbounds[1], \
                                  fovbounds[2]:fovbounds[3]]
-                ThisFOV_RGB = scipy.misc.toimage(ThisFOV_RGB, \
+                ThisFOV_RGB = imageutils.toimage(ThisFOV_RGB, \
                                                  high=np.max(ThisFOV_RGB),\
                                                  low=np.min(ThisFOV_RGB))
                 savename_im = "{}".format(imname.split(EXT_IMGS)[0]) + \
@@ -307,7 +309,7 @@ def GetSplitData(IMAGEPATH="", LABELPATH="", MODELPATH="", \
                 
                 # label
                 if not IS_UNLABELED:
-                    ThisFOV_GT = scipy.misc.toimage(ThisFOV_GT, high=np.max(ThisFOV_GT),\
+                    ThisFOV_GT = imageutils.toimage(ThisFOV_GT, high=np.max(ThisFOV_GT),\
                                                     low=np.min(ThisFOV_GT), mode='I')
                     
                     savename_lbl = "{}".format(labelname.split(EXT_LBLS)[0]) + \
@@ -513,7 +515,7 @@ def LoadData(IMAGEPATH="", LABELPATH="", \
         
         except FileNotFoundError:
             # Big image
-            BigIm = scipy.misc.imread(IMAGEPATH + imname)
+            BigIm = imageio.imread(IMAGEPATH + imname)
             
             if USE_MMAP:
                 # save npy file to be able to mmap
@@ -525,7 +527,7 @@ def LoadData(IMAGEPATH="", LABELPATH="", \
                 if matFile:
                     BigLbl = loadmat(LABELPATH + labelname)['label_crop']
                 else:
-                    BigLbl = scipy.misc.imread(LABELPATH + labelname)
+                    BigLbl = imageio.imread(LABELPATH + labelname)
                     
                 # Since label images were multiplied by some factor to increase visibility
                 BigLbl = BigLbl / SCALEFACTOR
@@ -594,7 +596,7 @@ def Mass_Resize(IMAGEPATH="", FRACTION=0.25, GTinfo=False):
         
         print("Resizing image {} ({})".format(i, j))
         
-        Thisim = scipy.misc.imread(IMAGEPATH + j)
+        Thisim = imageio.imread(IMAGEPATH + j)
         
         dims_original = np.array(Thisim.shape)
         dims_small = np.int32(FRACTION * dims_original)
